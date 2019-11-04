@@ -15,6 +15,7 @@ public class Smth extends LinearOpMode {
     private Gyroscope imu;
     private DcMotor motorTest;
     private DcMotor motorTest2;
+    private DcMotor motorTest3;
     private DigitalChannel digitalTouch;
     private DistanceSensor sensorColorRange;
     private Servo servoTest;
@@ -26,6 +27,7 @@ public class Smth extends LinearOpMode {
 
         motorTest = hardwareMap.get(DcMotor.class, "motor");
         motorTest2 = hardwareMap.get(DcMotor.class, "motor2");
+        motorTest3 = hardwareMap.get(DcMotor.class, "motor3");
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -35,15 +37,19 @@ public class Smth extends LinearOpMode {
         // run until the end of the match (driver presses STOP)
         double tgtPower = 0;
         double tgtPower2 = 0;
+        double tgtPower3 = 0;
         while (opModeIsActive()) {
-            tgtPower = -this.gamepad2.left_stick_x;
+            tgtPower = -this.gamepad1.left_stick_x;
             motorTest.setPower(tgtPower);
             tgtPower2 = -this.gamepad1.right_stick_x;
             motorTest2.setPower(tgtPower2);
+            tgtPower3 = -this.gamepad1.right_stick_y;
+            motorTest3.setPower(tgtPower3);
             telemetry.addData("Power 1", tgtPower);
             telemetry.addData("Power 2", tgtPower2);
             telemetry.addData("1st Motor Power", motorTest.getPower());
             telemetry.addData("2st Motor Power", motorTest2.getPower());
+            telemetry.addData("3st Motor Power", motorTest3.getPower());
             telemetry.addData("Status", "Running");
             telemetry.update();
 
