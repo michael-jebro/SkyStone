@@ -16,6 +16,9 @@ import java.util.TimerTask;
 public class Auto_Run extends LinearOpMode {
     private DcMotor motorTest;
     private DcMotor motorTest2;
+    private DcMotor motorTest3;
+    private Servo servo;
+    private Servo servo1;
 
     Timer timer = new Timer();
 
@@ -35,8 +38,12 @@ public class Auto_Run extends LinearOpMode {
     @Override
     public void runOpMode() {
 
+
         motorTest = hardwareMap.get(DcMotor.class, "motor");
         motorTest2 = hardwareMap.get(DcMotor.class, "motor2");
+        motorTest3 = hardwareMap.get(DcMotor.class, "motor3");
+        servo = hardwareMap.get(Servo.class, "servo");
+        servo1 = hardwareMap.get(Servo.class, "servo1");
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
