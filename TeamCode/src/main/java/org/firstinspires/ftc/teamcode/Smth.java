@@ -6,8 +6,10 @@ import com.qualcomm.ftccommon.SoundPlayer;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.LightSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
 
 import java.io.File;
 
@@ -18,9 +20,11 @@ public class Smth extends LinearOpMode {
     static DcMotor motorWheel1;
     static DcMotor motorWheel2;
     static DcMotor motorArm;
+    static LightSensor WheelLightSensor;
 
     static Servo servoHand1;
     static Servo servoHand2;
+    static Servo servoBack;
 
     public static ElapsedTime elapsedTime;
 
@@ -35,6 +39,8 @@ public class Smth extends LinearOpMode {
 
     static boolean dpadUpPressed = false;
     static boolean dpadDownPressed = false;
+    static boolean isDpadLeftPressed = false;
+    static boolean isDpadRightPressed = false;
 
     static boolean isLeftBumbperPressed = false;
 
@@ -47,6 +53,15 @@ public class Smth extends LinearOpMode {
     static boolean dead = false;
     static boolean threadRuns = false;
 
+    static boolean isBlackInFrontOfLightSensor;
+
+    double leftStickX;
+    double leftStickY;
+    double rightStickX;
+    double rightStickY;
+
+    double LeftWheelPower;
+    double RightWheelPower;
 
     public void playR2D2Loudly(){
         for (int i = 0; i < 7; i++) {
@@ -61,12 +76,17 @@ public class Smth extends LinearOpMode {
     @Override
     public void runOpMode() {
 
+
+        WheelLightSensor = hardwareMap.get(LightSensor.class, "lightSensor1");
+
         motorWheel1 = hardwareMap.get(DcMotor.class, "motor");
         motorWheel2 = hardwareMap.get(DcMotor.class, "motor2");
         motorArm = hardwareMap.get(DcMotor.class, "motor3");
 
         servoHand1 = hardwareMap.get(Servo.class, "servo");
         servoHand2 = hardwareMap.get(Servo.class, "servo1");
+
+        servoBack = hardwareMap.get(Servo.class, "servo2");
 
         elapsedTime = new ElapsedTime();
 
@@ -82,24 +102,85 @@ public class Smth extends LinearOpMode {
         // Reset timer
         elapsedTime.reset();
 
+
+
+        // ----- Main  Loop -----
         while (opModeIsActive()) {
 
-            firstWheelPower = -this.gamepad1.left_stick_y;
-            motorWheel1.setPower(firstWheelPower);
-            secondWheelPower = -this.gamepad1.right_stick_y;
-            motorWheel2.setPower(-secondWheelPower);
+            //Geting all variables:
+            //-----------------------------------------------------
 
-            // Get state of arm buttons
-            dpadUpPressed = this.gamepad1.dpad_left;
-            dpadDownPressed = this.gamepad1.dpad_right;
 
-            yPressed = this.gamepad1.y;
-
+            // Get state of dpad buttons
             dpadUpPressed = this.gamepad1.dpad_up;
             dpadDownPressed = this.gamepad1.dpad_down;
+            isDpadLeftPressed = this.gamepad1.dpad_left;
+            isDpadRightPressed = this.gamepad1.dpad_right;
+
+            // Get state of sticks
+            leftStickX = -this.gamepad1.left_stick_x;
+            leftStickY = this.gamepad1.left_stick_y;
+            rightStickX = -this.gamepad1.right_stick_x;
+            rightStickY = this.gamepad1.right_stick_y;
+
+            // Get state of color buttons
+            yPressed = this.gamepad1.y;
+
+            // Get state of servo controller
+            isLeftBumbperPressed = this.gamepad1.left_bumper;
+            //-----------------------------------------------------
+
+            // Omni wheels control:
+            if(isDpadLeftPressed == true) {
+                //set front wheels power to -1
+            }
+            if(isDpadRightPressed == true) {
+                //set back wheels power to 1
+            }
+
+            // Light sensor work:
+            //if(WheelLightSensor)
+
+
+
+//            LeftWheelPower = (leftStickX - leftStickY);
+//            RightWheelPower = (leftStickX + leftStickY);
+
+            double v = ((100-Math.abs(leftStickX))*(leftStickY/100)+leftStickY);
+            double w = ((100-Math.abs(leftStickY))*(leftStickX/100)+leftStickX);
+
+            LeftWheelPower =Range.clip((v+w)/2,-1,1);
+            RightWheelPower =Range.clip((-(v-w)/2),-1,1);
+
+            motorWheel1.setPower(RightWheelPower);
+            motorWheel2.setPower(LeftWheelPower);
+
+//            motorWheel1.setPower(Range.clip(RightWheelPower,-1.0, 1.0));
+//            motorWheel2.setPower(Range.clip(LeftWheelPower,-1.0, 1.0));
+
+            //Back srevo code:
+            if(this.gamepad1.right_bumper) {
+                servoBack.setPosition(0);
+            }
+            else {
+                servoBack.setPosition(0.6);
+            }
+
+
+//            firstWheelPower = -rightStickY;
+//            motorWheel1.setPower(firstWheelPower);
+//            secondWheelPower = -leftStickY;
+//            motorWheel2.setPower(-secondWheelPower);
+
+
+
+
+
+
 
 
             // Check if arm buttons pressed and set power
+            /*
             if(!dpadUpPressed & !dpadDownPressed) {
                 motorArm.setPower(0);
             }else{
@@ -113,9 +194,12 @@ public class Smth extends LinearOpMode {
                 }
 
             }
+            */
 
-            // Get state of servo controller
-            isLeftBumbperPressed = this.gamepad1.left_bumper;
+            // Get state of arm buttons but by triggers
+            motorArm.setPower((gamepad1.right_trigger - gamepad1.left_trigger)/2);
+
+
 
 
             // Check if left bumber pressed and set
@@ -200,18 +284,40 @@ public class Smth extends LinearOpMode {
 
 
             telemetry.addData("Dead", dead);
-            telemetry.addData("dpadDown", dpadDownPressed);
-            telemetry.addData("dpadUp", dpadUpPressed);
-            telemetry.addData("yPressed", yPressed);
-            telemetry.addData("threadRuns", threadRuns);
+            telemetry.addData("Is \"y\" pressed: ", yPressed);
+            telemetry.addData("threadRuns: ", threadRuns);
 
-            telemetry.addData("Motor 1", firstWheelPower);
-            telemetry.addData("Motor 2", secondWheelPower);
-            telemetry.addData("Timer", elapsedTime.time());
-            telemetry.addData("Status", "Running");
+            //motorArm.setPower((gamepad1.right_trigger - gamepad1.left_trigger)/3);
+
+            telemetry.addData("Rotor Arm: ", motorArm.getPower());
+            telemetry.addData("Right trigger: ", gamepad1.right_trigger);
+            telemetry.addData("Left trigger: ", gamepad1.left_trigger);
+
+            telemetry.addData("dpad up: ", dpadUpPressed);
+            telemetry.addData("dpad down: ", dpadDownPressed);
+            telemetry.addData("dpad left: ", isDpadLeftPressed);
+            telemetry.addData("dpad right: ", isDpadRightPressed);
+
+            telemetry.addData("Servo Back: ", servoBack.getPosition());
+            telemetry.addData("Timer: ", elapsedTime.time());
+            telemetry.addData("Status: ", "Running");
+
+            telemetry.addData("Left motor power: ", LeftWheelPower);
+            telemetry.addData("Right motor power: ", RightWheelPower);
+            telemetry.addData("V: ", v);
+            telemetry.addData("W: ", w);
+            telemetry.addData("LeftStickX: ", leftStickX);
+            telemetry.addData("LeftStickY: ", leftStickY);
+            telemetry.addData("RightStickX: ", rightStickX);
+            telemetry.addData("RightStickY: ", rightStickY);
+
+            //temp light sensor debug:
+            telemetry.addData("getLightDetected: ", WheelLightSensor.getLightDetected());
+            telemetry.addData("getRawLightDetected: ", WheelLightSensor.getRawLightDetected());
+            telemetry.addData("getRawLightDetectedMax: ", WheelLightSensor.getRawLightDetectedMax());
+            telemetry.addData("status: ", WheelLightSensor.status());
+
             telemetry.update();
-
-
         }
     }
 }
