@@ -5,6 +5,7 @@ import android.os.Environment;
 import com.qualcomm.ftccommon.SoundPlayer;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.LightSensor;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -20,7 +21,7 @@ public class Smth extends LinearOpMode {
     static DcMotor motorWheel1;
     static DcMotor motorWheel2;
     static DcMotor motorArm;
-    static LightSensor WheelLightSensor;
+    static ColorSensor WheelLightSensor;
 
     static Servo servoHand1;
     static Servo servoHand2;
@@ -77,7 +78,8 @@ public class Smth extends LinearOpMode {
     public void runOpMode() {
 
 
-        WheelLightSensor = hardwareMap.get(LightSensor.class, "lightSensor1");
+        WheelLightSensor = hardwareMap.get(ColorSensor.class, "l");
+        WheelLightSensor.enableLed(true);
 
         motorWheel1 = hardwareMap.get(DcMotor.class, "motor");
         motorWheel2 = hardwareMap.get(DcMotor.class, "motor2");
@@ -143,20 +145,24 @@ public class Smth extends LinearOpMode {
 
 
 
-//            LeftWheelPower = (leftStickX - leftStickY);
-//            RightWheelPower = (leftStickX + leftStickY);
+            LeftWheelPower = leftStickY;
+            RightWheelPower = rightStickY;
 
-            double v = ((100-Math.abs(leftStickX))*(leftStickY/100)+leftStickY);
+            /*double v = ((100-Math.abs(leftStickX))*(leftStickY/100)+leftStickY);
             double w = ((100-Math.abs(leftStickY))*(leftStickX/100)+leftStickX);
-
             LeftWheelPower =Range.clip((v+w)/2,-1,1);
             RightWheelPower =Range.clip((-(v-w)/2),-1,1);
 
-            motorWheel1.setPower(RightWheelPower);
+            LeftWheelPower =(v+w)/2;
+            RightWheelPower =-(v-w)/2;*/
+
+
+
+            motorWheel1.setPower(-RightWheelPower);
             motorWheel2.setPower(LeftWheelPower);
 
-//            motorWheel1.setPower(Range.clip(RightWheelPower,-1.0, 1.0));
-//            motorWheel2.setPower(Range.clip(LeftWheelPower,-1.0, 1.0));
+            /*motorWheel1.setPower(Range.clip(RightWheelPower,-1.0, 1.0));
+            motorWheel2.setPower(Range.clip(LeftWheelPower,-1.0, 1.0));*/
 
             //Back srevo code:
             if(this.gamepad1.right_bumper) {
@@ -167,10 +173,10 @@ public class Smth extends LinearOpMode {
             }
 
 
-//            firstWheelPower = -rightStickY;
-//            motorWheel1.setPower(firstWheelPower);
-//            secondWheelPower = -leftStickY;
-//            motorWheel2.setPower(-secondWheelPower);
+            /*firstWheelPower = -rightStickY;
+            motorWheel1.setPower(firstWheelPower);
+            secondWheelPower = -leftStickY;
+            motorWheel2.setPower(-secondWheelPower);*/
 
 
 
@@ -273,7 +279,7 @@ public class Smth extends LinearOpMode {
 
             if((int)elapsedTime.time()==5){
                 elapsedTime.reset();
-            }*/
+            }
 
             /*if(dead){
                 threadRuns = true;
@@ -304,18 +310,13 @@ public class Smth extends LinearOpMode {
 
             telemetry.addData("Left motor power: ", LeftWheelPower);
             telemetry.addData("Right motor power: ", RightWheelPower);
-            telemetry.addData("V: ", v);
-            telemetry.addData("W: ", w);
             telemetry.addData("LeftStickX: ", leftStickX);
             telemetry.addData("LeftStickY: ", leftStickY);
             telemetry.addData("RightStickX: ", rightStickX);
             telemetry.addData("RightStickY: ", rightStickY);
 
             //temp light sensor debug:
-            telemetry.addData("getLightDetected: ", WheelLightSensor.getLightDetected());
-            telemetry.addData("getRawLightDetected: ", WheelLightSensor.getRawLightDetected());
-            telemetry.addData("getRawLightDetectedMax: ", WheelLightSensor.getRawLightDetectedMax());
-            telemetry.addData("status: ", WheelLightSensor.status());
+            telemetry.addData("getLightDetected: ", WheelLightSensor.red());
 
             telemetry.update();
         }
