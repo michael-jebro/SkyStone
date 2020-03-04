@@ -1,0 +1,4 @@
+#Tue Mar 03 09:28:13 GMT+02:00 2020
+base.0=C\:\\Users\\luchitskiy\\Desktop\\FTC2020-master\\Team16877Code\\build\\intermediates\\dex\\debug\\mergeDexDebug\\out\\classes.dex
+path.0=classes.dex
+renamed.0=classes.dex
